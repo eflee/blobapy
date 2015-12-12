@@ -22,7 +22,7 @@ if __name__ == "__main__":
         name="blobapy",
         version=get_version(),
         url="https://github.com/eflee/blobapy",
-        packages=find_packages(exclude=("tests", "docs", "examples")),
+        packages=find_packages(exclude=("tests")),
         install_requires=REQUIREMENTS,
         tests_require=REQUIREMENTS + TEST_REQUIREMENTS,
     )
