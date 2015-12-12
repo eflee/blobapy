@@ -2,5 +2,5 @@
     :target: https://travis-ci.org/eflee/blobapy
 .. image:: https://img.shields.io/coveralls/eflee/blobapy/master.svg?style=flat-square
     :target: https://coveralls.io/github/eflee/blobapy
-.. image:: https://img.shields.io/pypi/l/blobapy.svg?style=flat-square
-    :target: https://github.com/eflee/blobapy/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/eflee/blobapy.svg?style=flat-square
+    :target: https://github.com/elfee/blobapy/blob/master/LICENSE
