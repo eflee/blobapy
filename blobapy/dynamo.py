@@ -1,4 +1,5 @@
 from . import aws
+from . import exc
 import uuid
 from bloop import Engine, UUID, Boolean, Column, ConstraintViolation
 engine = Engine(session=aws.session)
@@ -6,10 +7,6 @@ engine = Engine(session=aws.session)
 
 def default(kwargs, key, value):
     kwargs[key] = kwargs.get(key, value)
-
-
-class CreateFailed(Exception):
-    pass
 
 
 class Blob(engine.model):
@@ -20,22 +17,24 @@ class Blob(engine.model):
     admin_key = Column(UUID, name='a')
     deleted = Column(Boolean, name='d')
 
+    NOT_EXISTS = key_name.is_(None)
+
     def __init__(self, **kwargs):
         default(kwargs, "deleted", False)
         super().__init__(**kwargs)
 
     @classmethod
     def unique(cls):
-        retries = 5
-        while retries:
-            obj = cls(key_name=uuid.uuid4(), admin_key=uuid.uuid4())
-            try:
-                engine.save(obj, condition=_not_exists)
-            except ConstraintViolation:
-                retries -= 1
-            else:
-                return obj
-        raise CreateFailed
-engine.bind()
+        with exc.on_botocore("Failed to generate unique key_name"):
+            retries = 5
+            while retries:
+                obj = cls(key_name=uuid.uuid4(), admin_key=uuid.uuid4())
+                try:
+                    engine.save(obj, condition=Blob.NOT_EXISTS)
+                except ConstraintViolation:
+                    retries -= 1
+                else:
+                    return obj
+            raise exc.OperationFailed
 
-_not_exists = Blob.key_name.is_(None)
+engine.bind()
