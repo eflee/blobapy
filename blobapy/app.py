@@ -9,7 +9,7 @@ app = flask.Flask(__name__)
 def get_object(key_name):
     """Return pre-signed URL for download"""
     try:
-        url = s3.authorize_put(key_name)
+        url = s3.authorize_get(key_name)
     except exc.OperationFailed:
         # TODO: Log exception
         flask.abort(500)

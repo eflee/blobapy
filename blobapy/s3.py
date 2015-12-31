@@ -1,8 +1,7 @@
+import functools
 from . import aws
 from . import exc
 from . import retry
-import functools
-
 client = aws.session.client("s3")
 NO_URL = "Failed to generate presigned url"
 

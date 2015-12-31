@@ -1,8 +1,8 @@
+import uuid
+from bloop import Engine, UUID, Boolean, Column, ConstraintViolation
 from . import aws
 from . import exc
 from . import retry
-import uuid
-from bloop import Engine, UUID, Boolean, Column, ConstraintViolation
 engine = Engine(session=aws.session)
 
 
