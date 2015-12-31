@@ -1,4 +1,4 @@
-import botocore
+import botocore.exceptions
 import contextlib
 
 
