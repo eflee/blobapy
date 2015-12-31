@@ -18,5 +18,5 @@ def _s3_authorize(operation_name, key_name, expiration):
         {'Key': key_name, 'Bucket': 'blobapy-objects'},
         ExpiresIn=expiration)
 
-authorize_put = functools.partial(_authorize, operation_name="put_object")
-authorize_get = functools.partial(_authorize, operation_name="get_object")
+authorize_put = functools.partial(_authorize, "put_object")
+authorize_get = functools.partial(_authorize, "get_object")
