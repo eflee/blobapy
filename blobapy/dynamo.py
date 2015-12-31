@@ -6,6 +6,7 @@ engine = Engine(session=aws.session)
 
 
 def default(kwargs, key, value):
+    """If `key` is missing from a dict, set it to `value`"""
     kwargs[key] = kwargs.get(key, value)
 
 
@@ -31,10 +32,9 @@ class Blob(engine.model):
                 obj = cls(key_name=uuid.uuid4(), admin_key=uuid.uuid4())
                 try:
                     engine.save(obj, condition=Blob.NOT_EXISTS)
+                    return obj
                 except ConstraintViolation:
                     retries -= 1
-                else:
-                    return obj
             raise exc.OperationFailed
 
 engine.bind()
