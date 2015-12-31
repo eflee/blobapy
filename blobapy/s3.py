@@ -1,19 +1,23 @@
 from . import aws
+from . import exc
+from . import retry
+import functools
 
 client = aws.session.client("s3")
+NO_URL = "Failed to generate presigned url"
 
 
-def authorize_put(key_name):
-    return _authorize_operation("put_object", key_name)
+def _authorize(operation_name, key_name, expiration=900):
+    with exc.on_botocore(NO_URL):
+        return retry.exponential(
+            _s3_authorize, (operation_name, key_name, expiration))
 
 
-def authorize_get(key_name):
-    return _authorize_operation("get_object", key_name)
-
-
-def _authorize_operation(operation_name, key_name, expiration=900):
-    url = client.generate_presigned_url(
+def _s3_authorize(operation_name, key_name, expiration):
+    return client.generate_presigned_url(
         operation_name,
         {'Key': key_name, 'Bucket': 'blobapy-objects'},
         ExpiresIn=expiration)
-    return url
+
+authorize_put = functools.partial(_authorize, operation_name="put_object")
+authorize_get = functools.partial(_authorize, operation_name="get_object")
