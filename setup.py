@@ -8,6 +8,7 @@ def get_version():
                 return eval(line.split("=")[-1])
 
 REQUIREMENTS = [
+    "bloop"
 ]
 
 TEST_REQUIREMENTS = [
