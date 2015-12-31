@@ -12,4 +12,5 @@ def on_botocore(msg):
     try:
         yield
     except botocore.exceptions.BotoCoreError:
+        # TODO: Log exception
         raise OperationFailed(msg)
