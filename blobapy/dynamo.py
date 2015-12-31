@@ -1,5 +1,6 @@
 from . import aws
 from . import exc
+from . import retry
 import uuid
 from bloop import Engine, UUID, Boolean, Column, ConstraintViolation
 engine = Engine(session=aws.session)
@@ -8,6 +9,9 @@ engine = Engine(session=aws.session)
 def default(kwargs, key, value):
     """If `key` is missing from a dict, set it to `value`"""
     kwargs[key] = kwargs.get(key, value)
+
+
+NO_UNIQUE = "Failed to generate unique key_name"
 
 
 class Blob(engine.model):
@@ -26,15 +30,14 @@ class Blob(engine.model):
 
     @classmethod
     def unique(cls):
-        with exc.on_botocore("Failed to generate unique key_name"):
-            retries = 5
-            while retries:
-                obj = cls(key_name=uuid.uuid4(), admin_key=uuid.uuid4())
-                try:
-                    engine.save(obj, condition=Blob.NOT_EXISTS)
-                    return obj
-                except ConstraintViolation:
-                    retries -= 1
-            raise exc.OperationFailed
+        with exc.on_botocore(NO_UNIQUE):
+            return retry.exponential(
+                cls._generate, ignore=ConstraintViolation)
+
+    @classmethod
+    def _generate(cls):
+        obj = cls(key_name=uuid.uuid4(), admin_key=uuid.uuid4())
+        engine.save(obj, condition=Blob.NOT_EXISTS)
+        return obj
 
 engine.bind()

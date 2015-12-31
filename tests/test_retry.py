@@ -1,5 +1,6 @@
 import pytest
 import time
+import blobapy.exc
 import blobapy.retry
 
 
@@ -61,17 +62,13 @@ def test_exponential_unexpected():
 def test_exponential_max_attempts(patch_sleep):
     class Retryable(Exception):
         pass
-    call = 0
 
     def func():
-        nonlocal call
-        call += 1
-        raise Retryable(call)
+        raise Retryable
 
-    with pytest.raises(Retryable) as excinfo:
+    with pytest.raises(blobapy.exc.OperationFailed):
         blobapy.retry.exponential(func, ignore=Retryable)
     assert patch_sleep["calls"] == [0.1, 0.2, 0.4, 0.8]
-    assert excinfo.value.args == (5,)
 
 
 def test_exponential_ignore_multiple(patch_sleep):
@@ -91,6 +88,5 @@ def test_exponential_ignore_multiple(patch_sleep):
             raise R2
         return True
 
-    result = blobapy.retry.exponential(func, ignore=[R1, R2])
-    assert result
+    assert blobapy.retry.exponential(func, ignore=[R1, R2])
     assert patch_sleep["calls"] == [0.1, 0.2]

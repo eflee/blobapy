@@ -1,3 +1,4 @@
+from . import exc
 import collections.abc
 import time
 
@@ -20,17 +21,15 @@ def exponential(func, args=None, kwargs=None,
     args = args or []
     kwargs = kwargs or {}
     ignore = ensure_tuple(ignore)
-    last_exc = None
     while True:
         attempt += 1
         try:
             return func(*args, **kwargs)
-        except Exception as exc:
-            if not isinstance(exc, ignore):
-                raise exc
-            last_exc = exc
+        except Exception as exception:
+            if not isinstance(exception, ignore):
+                raise exception
         if attempt < attempts:
             backoff = backoff_coeff * (backoff_base ** attempt) / 1000.0
             time.sleep(backoff)
         else:
-            raise last_exc
+            raise exc.OperationFailed
