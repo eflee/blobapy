@@ -21,8 +21,9 @@ def put_object():
     """Return pre-signed URL and key for upload; and delete auth token."""
     try:
         blob = dynamo.Blob.unique()
-        url = s3.authorize_put(blob.key_name)
+        url = s3.authorize_put(str(blob.key_name))
     except exc.OperationFailed:
         # TODO: Log exception
         flask.abort(500)
-    return flask.jsonify(url=url, admin_key=blob.admin_key)
+    return flask.jsonify(
+        url=url, key_name=blob.key_name, admin_key=blob.admin_key)
